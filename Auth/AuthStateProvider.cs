@@ -1,24 +1,35 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
+using TaxiBlazor.Models;
 
 namespace TaxiBlazor.Auth
 {
     public class AuthStateProvider : AuthenticationStateProvider
     {
+        private readonly ILocalStorageService _localStorageService;
+        public AuthStateProvider(ILocalStorageService localStorageService) 
+        {
+            _localStorageService = localStorageService;
+        }
         public async override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            await Task.Delay(500);
+            var token = await _localStorageService.GetAsync<SecurityToken>("SecurityToken");
 
-            //var anonymous = new ClaimsIdentity();
-            //return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(anonymous)));
+            if (token is null || string.IsNullOrWhiteSpace(token.AccessToken) || token.ExpireAt < DateTime.Now)
+            {
+                var anonymous = new ClaimsIdentity();
+                return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(anonymous)));
+            }
+
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, "John Doe"),
+                new Claim(ClaimTypes.Name, token.UserName),
+                new Claim(ClaimTypes.Expired, token.ExpireAt.ToLongDateString()),
                 new Claim(ClaimTypes.Role, "Administrator")
             };
-            var anonymous = new ClaimsIdentity(claims, "testAuthType");
-            return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(anonymous)));
+            var identity = new ClaimsIdentity(claims, token.AccessToken);
+            return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(identity)));
         }
     }
 }

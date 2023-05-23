@@ -1,0 +1,24 @@
+﻿@page "/login"
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@using TaxiBlazor.Models;
+@inherits LoginModel
+
+<MudGrid>
+    <MudItem xs="12" sm="7">
+        <MudPaper Class="pa-4">
+            <MudForm @bind-IsValid="@success" Model="@LoginData">
+                <MudTextField T="string" Label="Username" @bind-Value="LoginData.UserName" Required="true" RequiredError="User name is required!" />
+
+                <MudTextField T="string" Label="Password" @bind-Value="LoginData.Password"  InputType="InputType.Password" />
+
+                <MudButton OnClick="@(()=>LoginAsync())" Disabled="@(!success)" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto mt-3">Login</MudButton>
+            </MudForm>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+
+@code {
+    bool success;
+}
