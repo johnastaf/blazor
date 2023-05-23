@@ -25,7 +25,7 @@ namespace TaxiBlazor.Models
 
             await LocalStorageService.SetAsync("SecurityToken", token);
 
-            NavManager.NavigateTo("/");
+            NavManager.NavigateTo("/", true);
         }
     }
 

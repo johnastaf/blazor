@@ -7,7 +7,7 @@ namespace TaxiBlazor.Auth
     public class AuthStateProvider : AuthenticationStateProvider
     {
         private readonly ILocalStorageService _localStorageService;
-        public AuthStateProvider(ILocalStorageService localStorageService) 
+        public AuthStateProvider(ILocalStorageService localStorageService)
         {
             _localStorageService = localStorageService;
         }
@@ -21,7 +21,6 @@ namespace TaxiBlazor.Auth
                 return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(anonymous)));
             }
 
-
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, token.UserName),
@@ -29,7 +28,17 @@ namespace TaxiBlazor.Auth
                 new Claim(ClaimTypes.Role, "Administrator")
             };
             var identity = new ClaimsIdentity(claims, token.AccessToken);
+
             return await Task.FromResult(new AuthenticationState(new ClaimsPrincipal(identity)));
+        }
+
+        public async Task MakeAnonymus()
+        {
+            await _localStorageService.RemoveAsync("SecurityToken");
+
+            var anonymous = new ClaimsIdentity();
+            var authState = Task.FromResult(new AuthenticationState(new ClaimsPrincipal(anonymous)));
+            NotifyAuthenticationStateChanged(authState);
         }
     }
 }
